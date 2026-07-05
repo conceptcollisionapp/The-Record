@@ -4,7 +4,7 @@
 
 A searchable, self-contained archive of **181 verified cases** where an official account — from a government, agency, or corporation — was later contradicted by evidence: declassified files, court verdicts, inspector-general reports, leaked documents, whistleblower testimony, or the institution's own admission.
 
-**Live site:** [https://YOURUSERNAME.github.io/the-record/](https://conceptcollisionapp.github.io/The-Record/)
+**Live site:** (https://conceptcollisionapp.github.io/The-Record/)
 
 No server. No tracking. No dependencies. One HTML file.
 
