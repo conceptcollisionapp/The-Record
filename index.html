@@ -57,7 +57,26 @@
   .countbar b{color:var(--stamp)}
 
   main{max-width:1100px;margin:8px auto 60px;padding:18px 22px 0}
-  .file{border:1.5px solid var(--ink);background:var(--paper-2);margin-bottom:22px;border-radius:2px;overflow:hidden;box-shadow:3px 4px 0 rgba(28,26,22,.16);border-left-width:6px}
+  .file{border:1.5px solid var(--ink);background:var(--paper-2);margin-bottom:22px;border-radius:2px;overflow:hidden;box-shadow:3px 4px 0 rgba(28,26,22,.16);border-left-width:6px;cursor:pointer}
+  .openhint{padding:0 20px 14px;font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.16em;color:var(--stamp);text-transform:uppercase}
+  .file .oh-close{display:none}
+  .file.open .oh-open{display:none}
+  .file.open .oh-close{display:inline}
+  .dossier{display:none;border-top:1.5px solid var(--ink);background:var(--paper);padding:16px 20px}
+  .file.open .dossier{display:block}
+  .dossier .deep{font-size:15px;line-height:1.65;margin:0 0 14px;color:var(--ink)}
+  .doclist .dochead{font-family:ui-monospace,monospace;font-size:10.5px;letter-spacing:.18em;color:var(--stamp);margin-bottom:8px}
+  .doclist a{display:block;font-family:ui-monospace,monospace;font-size:12.5px;color:var(--ink);text-decoration:none;border:1px solid var(--rule);background:var(--paper-2);padding:9px 11px;margin-bottom:6px;border-left:3px solid var(--stamp)}
+  .doclist a:hover{background:var(--aged)}
+  .doclist .ext{color:var(--ink-soft);font-size:10.5px}
+  .backlink{display:inline-block;font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.16em;color:var(--stamp);text-decoration:none;margin:6px 0 16px;border:1px solid var(--stamp);padding:7px 12px;background:var(--paper-2)}
+  .backlink:hover{background:var(--aged)}
+  .detailfile{cursor:default}
+  .file-title.big{font-size:clamp(22px,3.4vw,30px)}
+  .dossier.open{display:block}
+  .vnote{color:var(--ink-soft);letter-spacing:.06em;text-transform:none}
+  .cite{margin-top:14px;font-family:ui-monospace,monospace;font-size:12px;line-height:1.6;color:var(--ink);border-top:1px dashed var(--rule);padding-top:12px}
+  .nodocs{font-family:ui-monospace,monospace;font-size:11.5px;line-height:1.6;color:var(--ink-soft)}
   .file.t1{border-left-color:var(--stamp)} .file.t2{border-left-color:var(--t2)} .file.t3{border-left-color:var(--t3)}
   .file-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;padding:16px 18px 12px;border-bottom:1px solid var(--rule);background:linear-gradient(180deg,var(--aged),transparent)}
   .file-title{font-size:21px;font-weight:800;line-height:1.12;letter-spacing:-.01em}
@@ -110,6 +129,7 @@
   <p class="lede">A searchable file of cases where an official account was contradicted by later evidence. Each entry pairs <b>the statement at the time</b> with <b>what the record later showed</b>, plus <b>how it surfaced</b> — and is tagged by how strong the proof is, so you can tell a settled case from a contested one at a glance.</p>
 </header>
 
+<div id="archiveView">
 <div class="tiers">
   <div class="tierkey t1"><div class="h">Tier I — On the record</div><div class="d">Admitted, declassified, or decided in court. A trail you can pull.</div></div>
   <div class="tierkey t2"><div class="h">Tier II — Documented · contested</div><div class="d">Strong documentary evidence; the official side disputes the scope or framing.</div></div>
@@ -141,9 +161,11 @@
 </div>
 
 <main id="list"></main>
+</div>
+<section id="detail" style="display:none"></section>
 
 <footer>
-  <b>About the count.</b> There are 181 cases here, not 1,500 — every one is a case the compiler could actually stand behind with a named trail, each verified against a primary source or major investigation before it went in. Padding it with entries that can't be checked would destroy the one thing that makes the archive worth keeping. To grow it honestly, draw from primary archives: the <a href="https://nsarchive.gwu.edu" target="_blank" rel="noopener">National Security Archive</a>, the CIA FOIA reading room (CREST), <a href="https://www.governmentattic.org" target="_blank" rel="noopener">GovernmentAttic</a>, GovInfo, and agency reading rooms. Pull a document, verify it, then add it.<br><br>
+  <b>About the count.</b> There are 181 cases here, not 1,500 — every one is a case the compiler could actually stand behind with a named trail, each verified against a primary source or major investigation before it went in. Click any file to open its dossier; direct links to the primary documents are being added file by file, each link verified before it ships. Padding it with entries that can't be checked would destroy the one thing that makes the archive worth keeping. To grow it honestly, draw from primary archives: the <a href="https://nsarchive.gwu.edu" target="_blank" rel="noopener">National Security Archive</a>, the CIA FOIA reading room (CREST), <a href="https://www.governmentattic.org" target="_blank" rel="noopener">GovernmentAttic</a>, GovInfo, and agency reading rooms. Pull a document, verify it, then add it.<br><br>
   <b>How to read a file.</b> The most important field is <b>How it surfaced</b> — the mechanism that beat the cover-up: a named whistleblower, court discovery, a declassification act, records that survived a shredding order. Real suppressed truths crack along these lines and get <b>sharper</b> under scrutiny. The tier badge tells you how far that process has gone.<br><br>
   <b>Add your own.</b> Open this file in any editor, find the <code>DATA</code> array, copy a block. Fields: <code>title, cat, tier (1–3), said, saidYear, shown, shownYear, how, source</code>. Assign the tier honestly — Tier I only if there's an admission, declassification, or verdict. The rule that gives the archive its value: name the trail, or set it lower.
 </footer>
@@ -151,12 +173,12 @@
 <script>
 const DATA = [
   // ===== TIER I — ON THE RECORD =====
-  {title:"Gulf of Tonkin — the second attack",cat:"War & Intelligence",tier:1,said:"The administration reported two North Vietnamese attacks on U.S. destroyers, including August 4, 1964 — the basis for the resolution that escalated the Vietnam War.",saidYear:1964,shown:"An NSA historian concluded the August 4 attack did not occur and that signals intelligence was misread and selectively presented.",shownYear:2005,how:"NSA's own classified history (Robert Hanyok) declassified.",source:"NSA declassification, 2005–06"},
-  {title:"The Tuskegee syphilis study",cat:"Medical & Human Experiments",tier:1,said:"The Public Health Service presented a decades-long program for Black men in Alabama as free health care.",saidYear:1932,shown:"Treatment was withheld from ~600 men to study untreated syphilis — even after penicillin became standard.",shownYear:1972,how:"Whistleblower Peter Buxtun; AP reporter Jean Heller broke it.",source:"Associated Press, 1972"},
-  {title:"MKUltra mind-control experiments",cat:"Medical & Human Experiments",tier:1,said:"The CIA denied running programs that drugged and experimented on people, some unwitting.",saidYear:1963,shown:"It dosed subjects with LSD and other drugs without consent and ordered most records destroyed in 1973.",shownYear:1975,how:"Church Committee, then a FOIA request found financial records the purge missed.",source:"Church Committee 1975; FOIA 1977"},
-  {title:"COINTELPRO",cat:"Civil Liberties",tier:1,said:"The FBI denied any systematic program to surveil, infiltrate, and discredit activist groups.",saidYear:1968,shown:"It had covertly disrupted civil-rights and antiwar organizations for years.",shownYear:1971,how:"Citizens broke into a Media, PA field office and mailed the files to the press.",source:"Stolen FBI files 1971; Church Committee"},
+  {title:"Gulf of Tonkin — the second attack",cat:"War & Intelligence",tier:1,said:"The administration reported two North Vietnamese attacks on U.S. destroyers, including August 4, 1964 — the basis for the resolution that escalated the Vietnam War.",saidYear:1964,shown:"An NSA historian concluded the August 4 attack did not occur and that signals intelligence was misread and selectively presented.",shownYear:2005,how:"NSA's own classified history (Robert Hanyok) declassified.",source:"NSA declassification, 2005–06",deep:"NSA historian Robert Hanyok's internal study concluded the intercepts behind the August 4 'attack' were mistranslated and selectively cited — and that officials presented only the material supporting an attack. His study and the underlying signals intelligence were declassified in 2005–06 after pressure from historians. The National Security Archive's briefing book 'The Gulf of Tonkin Incident, 40 Years Later' collects the documents.",docs:[{t:"National Security Archive — declassified briefing books index (see 'Gulf of Tonkin, 40 Years Later')",u:"https://nsarchive2.gwu.edu/NSAEBB/"}]},
+  {title:"The Tuskegee syphilis study",cat:"Medical & Human Experiments",tier:1,said:"The Public Health Service presented a decades-long program for Black men in Alabama as free health care.",saidYear:1932,shown:"Treatment was withheld from ~600 men to study untreated syphilis — even after penicillin became standard.",shownYear:1972,how:"Whistleblower Peter Buxtun; AP reporter Jean Heller broke it.",source:"Associated Press, 1972",deep:"The study followed roughly 399 infected men and 201 controls for forty years; participants were told they were being treated for 'bad blood.' PHS insider Peter Buxtun raised the ethics internally in 1966 and was rebuffed — the story only ended when he went to the press. Administrative records survive at the National Archives (patient files restricted for privacy), a $10M settlement followed in 1974, and a formal presidential apology came in 1997.",docs:[{t:"CDC — The Untreated Syphilis Study at Tuskegee (records & timeline)",u:"https://www.cdc.gov/tuskegee/about/index.html"},{t:"National Archives — Tuskegee study records finding aid (RG 442)",u:"https://www.archives.gov/atlanta/finding-aids/tuskegee"}]},
+  {title:"MKUltra mind-control experiments",cat:"Medical & Human Experiments",tier:1,said:"The CIA denied running programs that drugged and experimented on people, some unwitting.",saidYear:1963,shown:"It dosed subjects with LSD and other drugs without consent and ordered most records destroyed in 1973.",shownYear:1975,how:"Church Committee, then a FOIA request found financial records the purge missed.",source:"Church Committee 1975; FOIA 1977",deep:"MKUltra ran from 1953 to 1973 across dozens of universities, hospitals, and prisons, funding drug, hypnosis, and behavior experiments — often on people who never knew they were subjects; Army scientist Frank Olson died after being dosed without his knowledge. CIA Director Richard Helms ordered the files destroyed in 1973. The program is known today largely because some 20,000 financial documents were misfiled and survived the purge, surfacing through a 1977 FOIA request and a second round of Senate hearings.",docs:[{t:"Project MKULTRA — joint Senate hearing, August 1977 (full PDF)",u:"https://www.intelligence.senate.gov/wp-content/uploads/2024/08/sites-default-files-hearings-95mkultra.pdf"}]},
+  {title:"COINTELPRO",cat:"Civil Liberties",tier:1,said:"The FBI denied any systematic program to surveil, infiltrate, and discredit activist groups.",saidYear:1968,shown:"It had covertly disrupted civil-rights and antiwar organizations for years.",shownYear:1971,how:"Citizens broke into a Media, PA field office and mailed the files to the press.",source:"Stolen FBI files 1971; Church Committee",deep:"Between 1956 and 1971 the Bureau ran thousands of disruption actions against groups it labeled subversive — forged letters, planted smears, manufactured conflicts between organizations — under Director Hoover's standing instructions. The Bureau's own files, first stolen from the Media office and later pried loose through FOIA litigation, are now posted for anyone to read in the FBI's public Vault.",docs:[{t:"COINTELPRO files — FBI Records: The Vault (full collection)",u:"https://vault.fbi.gov/cointel-pro"}]},
   {title:"Tobacco and the cancer link",cat:"Corporate",tier:1,said:"The industry publicly disputed the cancer link; in 1994 seven CEOs swore nicotine was not addictive.",saidYear:1994,shown:"Internal research had long acknowledged both the cancer link and addictiveness.",shownYear:1998,how:"Litigation discovery; whistleblower Jeffrey Wigand; 1998 Master Settlement.",source:"State litigation, 1990s"},
-  {title:"Operation Northwoods",cat:"War & Intelligence",tier:1,said:"Never disclosed at the time — a plan that would have been denied if asked.",saidYear:1962,shown:"The Joint Chiefs drafted proposals for staged attacks, including faked terrorism on Americans, to justify war with Cuba. Civilian leadership rejected it.",shownYear:1997,how:"Declassified under the JFK Records Act; publicized by James Bamford.",source:"JFK Records Act, 1997"},
+  {title:"Operation Northwoods",cat:"War & Intelligence",tier:1,said:"Never disclosed at the time — a plan that would have been denied if asked.",saidYear:1962,shown:"The Joint Chiefs drafted proposals for staged attacks, including faked terrorism on Americans, to justify war with Cuba. Civilian leadership rejected it.",shownYear:1997,how:"Declassified under the JFK Records Act; publicized by James Bamford.",source:"JFK Records Act, 1997",deep:"The signed Joint Chiefs memorandum — 'Justification for U.S. Military Intervention in Cuba,' 13 March 1962 — proposed a staged 'Communist Cuban terror campaign' in Miami and Washington, faked shoot-downs, and simulated casualties. Chairman Lyman Lemnitzer put it to Defense Secretary McNamara; President Kennedy rejected it and Lemnitzer was soon moved out of the chairmanship. You can read the memorandum itself below.",docs:[{t:"The Northwoods memorandum, 13 March 1962 — National Security Archive (PDF)",u:"https://nsarchive2.gwu.edu/news/20010430/northwoods.pdf"},{t:"Extended Northwoods file set — The Black Vault document archive",u:"https://www.theblackvault.com/documentarchive/operation-northwoods/"}]},
   {title:"NSA bulk metadata collection",cat:"Surveillance",tier:1,said:"In March 2013 the DNI told a Senate hearing the NSA did not 'wittingly' collect data on millions of Americans.",saidYear:2013,shown:"A program was collecting domestic phone metadata in bulk — contradicting the sworn answer.",shownYear:2013,how:"Documents taken by Edward Snowden, published by journalists.",source:"Snowden disclosures, 2013"},
   {title:"Iraq's weapons of mass destruction",cat:"War & Intelligence",tier:1,said:"The case for war asserted active chemical and biological stockpiles and a reconstituted nuclear program.",saidYear:2002,shown:"Postwar inspection found no stockpiles; programs were largely dismantled after 1991.",shownYear:2004,how:"The Iraq Survey Group's report; later Senate findings.",source:"Iraq Survey Group / Duelfer Report, 2004"},
   {title:"The death of Pat Tillman",cat:"War & Intelligence",tier:1,said:"The Army reported the former NFL player killed by enemy fire and awarded a Silver Star.",saidYear:2004,shown:"He was killed by friendly fire; elements of the command knew early while the public account stood.",shownYear:2005,how:"Family pressure forced investigations and congressional hearings.",source:"Army investigations & Congress, 2005–07"},
@@ -169,7 +191,7 @@ const DATA = [
   {title:"Iran-Contra",cat:"War & Intelligence",tier:1,said:"The administration denied trading arms for hostages and funding the Contras around a congressional ban.",saidYear:1985,shown:"It did both, diverting proceeds to the Contras.",shownYear:1987,how:"Investigations, the Tower Commission, and the President's own televised admission.",source:"Tower Commission, 1987"},
   {title:"The My Lai massacre",cat:"War & Intelligence",tier:1,said:"The Army initially reported a successful engagement against enemy forces.",saidYear:1968,shown:"U.S. soldiers killed hundreds of unarmed civilians; the killings were covered up the chain of command.",shownYear:1969,how:"Ron Ridenhour's letters; Seymour Hersh's reporting; the Peers Inquiry.",source:"Peers Inquiry; reporting 1969"},
   {title:"CIA plots against foreign leaders",cat:"War & Intelligence",tier:1,said:"The CIA denied involvement in plots to assassinate foreign heads of state.",saidYear:1960,shown:"It had developed plots against figures including Castro and Lumumba.",shownYear:1975,how:"The Church Committee's assassination report.",source:"Church Committee, 1975"},
-  {title:"The 'Family Jewels'",cat:"Surveillance",tier:1,said:"The CIA's catalog of its own illegal activities was kept internal and concealed.",saidYear:1973,shown:"An internal report compiled domestic spying, assassination plots, and experiments the agency knew were improper.",shownYear:2007,how:"Declassified and released decades after it was compiled.",source:"CIA release, 2007"},
+  {title:"The 'Family Jewels'",cat:"Surveillance",tier:1,said:"The CIA's catalog of its own illegal activities was kept internal and concealed.",saidYear:1973,shown:"An internal report compiled domestic spying, assassination plots, and experiments the agency knew were improper.",shownYear:2007,how:"Declassified and released decades after it was compiled.",source:"CIA release, 2007",deep:"Compiled in 1973 on Director James Schlesinger's order after Watergate, the 'Family Jewels' is the agency's roughly 700-page confession file: wiretaps on journalists, mail opening, surveillance of dissidents, detention of a defector, the Castro plots. It stayed sealed for over three decades until a National Security Archive FOIA request finally forced its release in 2007 — still carrying redactions. The full scanned document is linked below; several other files in this archive trace back to pages inside it.",docs:[{t:"The Family Jewels — full declassified document, CIA Reading Room (PDF)",u:"https://www.cia.gov/readingroom/docs/DOC_0001451843.pdf"},{t:"Family Jewels collection page — CIA FOIA Reading Room",u:"https://www.cia.gov/readingroom/collection/family-jewels"}]},
   {title:"Project 112 / SHAD",cat:"Medical & Human Experiments",tier:1,said:"The military did not disclose Cold War chemical- and biological-agent tests involving U.S. service members.",saidYear:1963,shown:"Tests exposed sailors and soldiers to agents and simulants, often without their knowledge.",shownYear:2002,how:"Pentagon acknowledgment and VA records.",source:"DoD acknowledgment, 2002"},
   {title:"Operation Sea-Spray over San Francisco",cat:"Medical & Human Experiments",tier:1,said:"Not disclosed at the time.",saidYear:1950,shown:"The Navy secretly sprayed bacteria over San Francisco to test bioweapon dispersal patterns.",shownYear:1976,how:"Declassified; surfaced in Senate hearings.",source:"Senate hearings, 1977"},
   {title:"Aerosol spraying over U.S. cities",cat:"Medical & Human Experiments",tier:1,said:"The Army characterized spraying over cities including St. Louis as harmless screening tests.",saidYear:1953,shown:"It secretly dispersed zinc cadmium sulfide aerosols, including over low-income neighborhoods, to study dispersal.",shownYear:1994,how:"Declassified; reviewed by a National Research Council panel.",source:"NRC review, 1997"},
@@ -310,10 +332,10 @@ const DATA = [
   {title:"The Aversion Project",cat:"Medical & Human Experiments",tier:1,said:"South Africa's military described gay conscripts in its psychiatric ward as volunteers receiving treatment.",saidYear:1971,shown:"They were subjected to electric-shock aversion and chemical castration to 'cure' homosexuality, and some to forced surgery.",shownYear:1999,how:"South Africa's Truth and Reconciliation Commission and a Medical Research Council–backed report.",source:"TRC; Aversion Project report, 1999"},
 
   {title:"MKNAOMI and the toxin stockpile",cat:"Medical & Human Experiments",tier:1,said:"The CIA did not disclose a joint program with the Army to develop biological agents and covert delivery devices.",saidYear:1952,shown:"MKNAOMI built and stored biological toxins and dart guns to deliver them; after a 1969 ban ordered stockpiles destroyed, a CIA scientist kept a cache of shellfish toxin anyway.",shownYear:1975,how:"Declassified by the CIA director in 1975 and documented by the Church Committee; records in the CIA reading room and National Archives.",source:"Church Committee; CIA declassification, 1975"},
-  {title:"The Media FBI break-in",cat:"Surveillance",tier:1,said:"The FBI ran COINTELPRO in secret and denied systematic surveillance of lawful political activity.",saidYear:1971,shown:"Activists broke into an FBI field office, took over 1,000 files, and mailed them to the press — exposing the program in the Bureau's own words, including orders to 'enhance paranoia' among dissenters.",shownYear:1971,how:"The stolen documents themselves, published in the press; later confirmed by the Church Committee and the burglars' 2014 disclosure.",source:"Media, PA files, 1971; Church Committee"},
-  {title:"CIA surveillance of journalists",cat:"Surveillance",tier:1,said:"The CIA did not acknowledge wiretapping or shadowing American reporters to find its leakers.",saidYear:1963,shown:"It wiretapped columnists Allen and Scott (Project Mockingbird) and surveilled Jack Anderson, Michael Getler, and Victor Marchetti — catalogued in the agency's own 'Family Jewels.'",shownYear:2007,how:"The Family Jewels, declassified after a 15-year National Security Archive FOIA case; some wiretap transcripts remain redacted.",source:"CIA Family Jewels, 2007; National Security Archive"},
+  {title:"The Media FBI break-in",cat:"Surveillance",tier:1,said:"The FBI ran COINTELPRO in secret and denied systematic surveillance of lawful political activity.",saidYear:1971,shown:"Activists broke into an FBI field office, took over 1,000 files, and mailed them to the press — exposing the program in the Bureau's own words, including orders to 'enhance paranoia' among dissenters.",shownYear:1971,how:"The stolen documents themselves, published in the press; later confirmed by the Church Committee and the burglars' 2014 disclosure.",source:"Media, PA files, 1971; Church Committee",docs:[{t:"COINTELPRO files (the program the burglars exposed) — FBI Vault",u:"https://vault.fbi.gov/cointel-pro"}]},
+  {title:"CIA surveillance of journalists",cat:"Surveillance",tier:1,said:"The CIA did not acknowledge wiretapping or shadowing American reporters to find its leakers.",saidYear:1963,shown:"It wiretapped columnists Allen and Scott (Project Mockingbird) and surveilled Jack Anderson, Michael Getler, and Victor Marchetti — catalogued in the agency's own 'Family Jewels.'",shownYear:2007,how:"The Family Jewels, declassified after a 15-year National Security Archive FOIA case; some wiretap transcripts remain redacted.",source:"CIA Family Jewels, 2007; National Security Archive",docs:[{t:"The Family Jewels — full declassified document, CIA Reading Room (PDF)",u:"https://www.cia.gov/readingroom/docs/DOC_0001451843.pdf"}]},
 
-  {title:"HTLINGUAL — the CIA mail-opening program",cat:"Surveillance",tier:1,said:"The CIA publicly had no domestic mandate and did not disclose that it was opening Americans' international mail.",saidYear:1952,shown:"For two decades it secretly opened and photographed mail passing through JFK airport to and from the USSR and China, building files far beyond any foreign-intelligence purpose.",shownYear:1975,how:"The Family Jewels and the Church Committee, drawing on the CIA's own records.",source:"Church Committee; CIA Family Jewels"},
+  {title:"HTLINGUAL — the CIA mail-opening program",cat:"Surveillance",tier:1,said:"The CIA publicly had no domestic mandate and did not disclose that it was opening Americans' international mail.",saidYear:1952,shown:"For two decades it secretly opened and photographed mail passing through JFK airport to and from the USSR and China, building files far beyond any foreign-intelligence purpose.",shownYear:1975,how:"The Family Jewels and the Church Committee, drawing on the CIA's own records.",source:"Church Committee; CIA Family Jewels",docs:[{t:"The Family Jewels — full declassified document, CIA Reading Room (PDF)",u:"https://www.cia.gov/readingroom/docs/DOC_0001451843.pdf"},{t:"Family Jewels collection page — CIA FOIA Reading Room",u:"https://www.cia.gov/readingroom/collection/family-jewels"}]},
   {title:"Projects RESISTANCE and MERRIMAC",cat:"Surveillance",tier:1,said:"The CIA did not acknowledge infiltrating and surveilling American campus and anti-war groups.",saidYear:1967,shown:"RESISTANCE enlisted college administrators and police to watch some 12,000 students and activists; MERRIMAC planted informants inside Washington anti-war organizations.",shownYear:1975,how:"Church Committee and Rockefeller Commission findings; surviving FOIA fragments — the CIA says the main files were destroyed in 1990.",source:"Rockefeller Commission; FOIA releases"},
 
   {title:"The Santa Susana meltdown",cat:"Nuclear",tier:1,said:"A 1959 accident at the Sodium Reactor Experiment near Los Angeles was not disclosed; the site was presented as safe.",saidYear:1959,shown:"The reactor had suffered a partial core meltdown, releasing radioactivity; the AEC and its contractor kept it secret for two decades.",shownYear:1979,how:"A watchdog group found the evidence in AEC archives and aired it; a state oversight panel later formed. The scale of release remains disputed.",source:"AEC archives; CA oversight panel"},
@@ -368,22 +390,39 @@ const catSel=document.getElementById('cat'),decSel=document.getElementById('deca
 ofTotal.textContent = 'of ' + DATA.length + ' total';
 
 const cats=[...new Set(DATA.map(d=>d.cat))].sort();
-catSel.innerHTML='<option value="">All categories</option>'+cats.map(c=>`<option>${c}</option>`).join('');
+catSel.innerHTML='<option value="">All categories</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
 const decades=[...new Set(DATA.map(d=>Math.floor(d.saidYear/10)*10))].sort((a,b)=>a-b);
 decSel.innerHTML='<option value="">All decades</option>'+decades.map(d=>`<option value="${d}">${d}s</option>`).join('');
 
 const TIERLABEL={1:'Tier I · on the record',2:'Tier II · contested',3:'Tier III · unresolved'};
-function esc(s){return String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function hostOf(u){try{return new URL(u).hostname.replace(/^www\./,'')}catch(e){return ''}}
+
+function matches(d,skip){
+  const term=q.value.trim().toLowerCase(),cat=catSel.value,dec=decSel.value,tier=tierSel.value;
+  if(skip!=='tier' && tier && d.tier!==+tier) return false;
+  if(skip!=='cat' && cat && d.cat!==cat) return false;
+  if(skip!=='decade' && dec && Math.floor(d.saidYear/10)*10!==+dec) return false;
+  if(term){const hay=(d.title+' '+d.said+' '+d.shown+' '+d.how+' '+d.source+' '+d.cat+' '+(d.deep||'')).toLowerCase();if(!hay.includes(term))return false;}
+  return true;
+}
+function updateFacets(){
+  [[tierSel,'tier',d=>String(d.tier)],[catSel,'cat',d=>d.cat],[decSel,'decade',d=>String(Math.floor(d.saidYear/10)*10)]].forEach(([sel,skip,keyf])=>{
+    const counts={};
+    DATA.forEach(d=>{if(matches(d,skip)){const k=keyf(d);counts[k]=(counts[k]||0)+1;}});
+    [...sel.options].forEach(o=>{
+      if(o.dataset.base===undefined)o.dataset.base=o.textContent.replace(/ \(\d+\)$/,'');
+      if(o.value===''){o.textContent=o.dataset.base;o.disabled=false;return;}
+      const c=counts[o.value]||0;
+      o.textContent=o.dataset.base+' ('+c+')';
+      o.disabled=(c===0 && o.value!==sel.value);
+    });
+  });
+}
 
 function render(){
   const term=q.value.trim().toLowerCase(),cat=catSel.value,dec=decSel.value,tier=tierSel.value,sort=sortSel.value;
-  let rows=DATA.filter(d=>{
-    if(tier && d.tier!==+tier) return false;
-    if(cat && d.cat!==cat) return false;
-    if(dec && Math.floor(d.saidYear/10)*10!==+dec) return false;
-    if(term){const hay=(d.title+' '+d.said+' '+d.shown+' '+d.how+' '+d.source+' '+d.cat).toLowerCase();if(!hay.includes(term))return false;}
-    return true;
-  });
+  let rows=DATA.filter(d=>matches(d));
   rows.sort((a,b)=>{
     if(sort==='tier') return a.tier-b.tier || (b.shownYear-b.saidYear)-(a.shownYear-a.saidYear);
     if(sort==='gap') return (b.shownYear-b.saidYear)-(a.shownYear-a.saidYear);
@@ -393,10 +432,11 @@ function render(){
     return 0;
   });
   countEl.textContent=rows.length;
+  updateFacets();
   if(!rows.length){list.innerHTML='<div class="empty">No files match.<br>Try a broader term or clear the filters.</div>';return;}
   list.innerHTML=rows.map(d=>{
     const gap=d.shownYear-d.saidYear;
-    return `<article class="file t${d.tier}">
+    return `<article class="file t${d.tier}" data-slug="${slugOf(d.title)}">
       <div class="file-head">
         <div>
           <div class="file-title">${esc(d.title)}</div>
@@ -417,12 +457,84 @@ function render(){
         <div class="how"><b>How it surfaced:</b> ${esc(d.how)}</div>
         <div class="src">SOURCE — ${esc(d.source)}</div>
       </div>
+      <div class="openhint"><span class="oh-open">▸ open file — full page, citation &amp; documents</span></div>
     </article>`;
   }).join('');
 }
+
+function slugOf(t){return t.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+const BYSLUG={};DATA.forEach(d=>BYSLUG[slugOf(d.title)]=d);
+const detailEl=document.getElementById('detail'),archiveEl=document.getElementById('archiveView');
+const BASETITLE=document.title;
+
+function autoTrail(d){
+  const blob=d.title+' '+d.said+' '+d.shown+' '+d.how+' '+d.source;
+  const gq=encodeURIComponent(d.title+' declassified documents');
+  const links=[{t:'Web search: "'+d.title+'" — primary documents',u:'https://www.google.com/search?q='+gq}];
+  if(/\bCIA\b/i.test(blob)) links.push({t:'Search the CIA FOIA Reading Room for this case',u:'https://www.cia.gov/readingroom/search/site/'+encodeURIComponent(d.title)});
+  if(/\bFBI\b/i.test(blob)) links.push({t:'FBI Records: The Vault — FOIA library',u:'https://vault.fbi.gov/'});
+  if(/congress|senate|committee|hearing/i.test(blob)) links.push({t:'GovInfo — congressional reports & hearings',u:'https://www.govinfo.gov/'});
+  links.push({t:'National Security Archive — declassified collections',u:'https://nsarchive.gwu.edu/'});
+  return links;
+}
+function showDetail(d){
+  const gap=d.shownYear-d.saidYear;
+  const trail=autoTrail(d);
+  detailEl.innerHTML=`
+    <a class="backlink" href="#">◂ BACK TO THE ARCHIVE — 181 FILES</a>
+    <article class="file t${d.tier} detailfile">
+      <div class="file-head">
+        <div>
+          <div class="file-title big">${esc(d.title)}</div>
+          <div class="file-meta">
+            <span class="tag tier${d.tier}">${esc(TIERLABEL[d.tier])}</span>
+            <span class="tag cat">${esc(d.cat)}</span>
+            <span class="tag">said ${d.saidYear}</span>
+            <span class="tag">revealed ${d.shownYear}</span>
+          </div>
+        </div>
+        <div class="gapbadge"><span class="n">${gap>0?gap:'&lt;1'}</span><span class="l">${gap>0?(gap===1?'year hidden':'years hidden'):'same year'}</span></div>
+      </div>
+      <div class="cols">
+        <div class="col said"><h4><span class="dot said"></span>On the record <span class="yr">${d.saidYear}</span></h4><p>${esc(d.said)}</p></div>
+        <div class="col shown"><h4><span class="dot shown"></span>In the documents <span class="yr">${d.shownYear}</span></h4><p>${esc(d.shown)}</p></div>
+      </div>
+      <div class="file-foot">
+        <div class="how"><b>How it surfaced:</b> ${esc(d.how)}</div>
+        <div class="src">SOURCE — ${esc(d.source)}</div>
+      </div>
+      <div class="dossier open">
+        ${d.deep?`<p class="deep">${esc(d.deep)}</p>`:''}
+        ${d.docs&&d.docs.length?`<div class="doclist"><div class="dochead">THE TRAIL — PRIMARY DOCUMENTS <span class="vnote">(verified direct links)</span></div>${d.docs.map(x=>`<a href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.t)} <span class="ext">↗ ${esc(hostOf(x.u))}</span></a>`).join('')}</div>`:''}
+        <div class="doclist"><div class="dochead">PULL THE TRAIL — ARCHIVES &amp; SEARCH</div>${trail.map(x=>`<a href="${esc(x.u)}" target="_blank" rel="noopener">${esc(x.t)} <span class="ext">↗ ${esc(hostOf(x.u))}</span></a>`).join('')}</div>
+        <div class="cite"><b>CITE THIS FILE:</b> “${esc(d.title)}.” <i>The Record</i>, tier ${d.tier===1?'I':d.tier===2?'II':'III'}. Stated ${d.saidYear}; contradicted ${d.shownYear}. Source: ${esc(d.source)}.</div>
+        ${d.docs&&d.docs.length?'':'<div class="nodocs" style="margin-top:10px">Verified direct-document links for this file are queued; the archive and search links above are live paths to the record.</div>'}
+      </div>
+    </article>`;
+  archiveEl.style.display='none';detailEl.style.display='block';
+  document.title=d.title+' — The Record';
+  window.scrollTo(0,0);
+}
+function showList(){
+  detailEl.style.display='none';archiveEl.style.display='';
+  document.title=BASETITLE;
+}
+function route(){
+  const h=location.hash;
+  if(h.startsWith('#file/')){const d=BYSLUG[h.slice(6)];if(d){showDetail(d);return;}}
+  showList();
+}
+
 q.addEventListener('input',render);
 [catSel,decSel,tierSel,sortSel].forEach(el=>el.addEventListener('change',render));
+list.addEventListener('click',e=>{
+  if(e.target.closest('a'))return;
+  const f=e.target.closest('.file');
+  if(f&&f.dataset.slug)location.hash='file/'+f.dataset.slug;
+});
+window.addEventListener('hashchange',route);
 render();
+route();
 </script>
 </body>
 </html>
